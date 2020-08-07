@@ -4,6 +4,9 @@ using UnityEngine;
 using KSerialization;
 namespace MultiIO
 {
+    /// <summary>
+    /// A single instance of an Output Port associated to a MultiOutput component. Behaves similarily to ConduitDispenser but works with the parent MultiOutput to permit multiple outputs while being highly configurable.
+    /// </summary>
     [SerializationConfig(MemberSerialization.OptIn)]
     public class OutputPort : ConduitIO
     {
@@ -28,7 +31,22 @@ namespace MultiIO
         private Action<OutputPort> conduitUpdateCallback = null;
 
         protected override Endpoint EndpointType => Endpoint.Source;
-        protected override ConduitFlowPriority FlowPriority => ConduitFlowPriority.Dispense;
+        private ConduitFlowPriority flowPriority = ConduitFlowPriority.Dispense;
+        /// <summary>
+        /// Advanced use only. Should only be changed when overriding ConduitUpdate behavior of the ports.
+        /// </summary>
+        public override ConduitFlowPriority FlowPriority
+        {
+            get
+            {
+                return flowPriority;
+            }
+            set
+            {
+                flowPriority = value;
+            }
+
+        }
 
         private static readonly Operational.Flag outputConnectedFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Requirement);
         private static readonly Operational.Flag outputEmptyFlag = new Operational.Flag("output_empty", Operational.Flag.Type.Requirement);

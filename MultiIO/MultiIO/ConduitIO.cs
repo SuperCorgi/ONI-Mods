@@ -96,9 +96,10 @@ namespace MultiIO
         {
             get;
         }
-        protected abstract ConduitFlowPriority FlowPriority
+        public abstract ConduitFlowPriority FlowPriority
         {
             get;
+            set;
         }
 
         protected FlowUtilityNetwork.NetworkItem _networkItem;

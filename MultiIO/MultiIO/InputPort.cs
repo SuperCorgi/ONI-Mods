@@ -5,13 +5,28 @@ using KSerialization;
 namespace MultiIO
 {
     //Plans to continue modifying the Solid InputPort behaviour for ConduitTick.
+    /// <summary>
+    /// A single instance of an Output Port associated to a MultiOutput component. Behaves similarily to ConduitDispenser but works with the parent MultiOutput to permit multiple outputs while being highly configurable.
+    /// </summary>
     [SerializationConfig(MemberSerialization.OptIn)]
     public class InputPort : ConduitIO
     {
+        /// <summary>
+        /// Specifies what should be done when an element not matching a specified filter is encountered by the port.
+        /// </summary>
         public enum WrongElementResult
         {
+            /// <summary>
+            /// Destroy the material being input. Not typically used.
+            /// </summary>
             Destroy,
+            /// <summary>
+            /// Dump the material out of the pipes.
+            /// </summary>
             Dump,
+            /// <summary>
+            /// Continue to store the material. Will still damage the associated building this port is attached to.
+            /// </summary>
             Store
         }
 
@@ -47,8 +62,21 @@ namespace MultiIO
         public bool KeepZeroMassObject = false;
 
         public SimHashes LastConsumedElement = SimHashes.Vacuum;
+        private ConduitFlowPriority flowPriority = ConduitFlowPriority.First;
 
-        protected override ConduitFlowPriority FlowPriority => ConduitFlowPriority.First;
+        public override ConduitFlowPriority FlowPriority
+        {
+            get
+            {
+                return flowPriority;
+            }
+            set
+            {
+                flowPriority = value;
+            }
+
+        }
+
         protected override Endpoint EndpointType => Endpoint.Sink;
         private bool PreviouslyConnected = false;
         private static readonly Operational.Flag inputConnectedFlag = new Operational.Flag("input_conduit", Operational.Flag.Type.Requirement);
