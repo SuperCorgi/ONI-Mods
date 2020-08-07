@@ -12,8 +12,9 @@ namespace MultiIO
         ///</summary>
         [SerializeField]
         public SimHashes[] ElementFilter;
-        ///<summary>True: The ElementFilter will act as a blacklist\n
-        ///False: The ElementFilter will act as a whitelist</summary>
+        ///<summary>
+        ///True: The ElementFilter will act as a blacklist   False: The ElementFilter will act as a whitelist
+        ///</summary>
         [SerializeField]
         public bool InvertElementFilter;
         /// <summary>
@@ -24,6 +25,7 @@ namespace MultiIO
         ///<summary>Default 20f (20KG). Conveyor rails have no built in maximum.</summary>
         [SerializeField]
         protected float SolidOutputMax = 20f;
+        private Action<OutputPort> conduitUpdateCallback = null;
 
         protected override Endpoint EndpointType => Endpoint.Source;
         protected override ConduitFlowPriority FlowPriority => ConduitFlowPriority.Dispense;
@@ -32,14 +34,35 @@ namespace MultiIO
         private static readonly Operational.Flag outputEmptyFlag = new Operational.Flag("output_empty", Operational.Flag.Type.Requirement);
         private bool PreviouslyEmpty = false;
         private bool PreviouslyConnected = false;
+        //Rotates through stored elements in storage each tick using this offset
         private int ElementOutputOffset = 0;
         private Guid NeedsConduitStatusItemGuid;
         private Guid ConduitBlockedStatusItemGuid;
+        //LIKELY DEAD CODE. NEVER USED AT THIS TIME.
         private bool isDispensing = false;
 
+        /// <summary>
+        /// Advanced use. Override the Input Port's default ConduitTick function with a custom function.
+        /// </summary>
+        public void ChangeConduitUpdater(Action<OutputPort> callback)
+        {
+            conduitUpdateCallback = callback;
+        }
 
         protected override void ConduitTick(float delta)
         {
+            if (conduitUpdateCallback != null)
+            {
+                try
+                {
+                    conduitUpdateCallback(this);
+                }
+                catch (Exception ex)
+                {
+                    string msg = "[MultiIO] InputPort.ConduitTick(delta) -> A custom Conduit Updater was defined but an exception was thrown within it";
+                    throw new Exception(msg, ex);
+                }
+            }
             UpdateConduitBlockedStatus();
             bool dispensed = false;
             if (!operational.IsOperational && !AlwaysDispense)
@@ -61,7 +84,7 @@ namespace MultiIO
                 IConduitFlow iConduitManager = GetConduitManager();
                 if (iConduitManager == null)
                 {
-                    Debug.LogError($"[MultiIO] OutputPort.ConduitTick(): iConduitManager is null");
+                    Debug.LogError($"[MultiIO] OutputPort.ConduitTick(): Could not retrieve IConduitFlow");
                 }
                 //Solid Conduits do not use the same kind of flow manager, so the code must be separated
                 if (ConduitType == ConduitType.Solid)
@@ -103,8 +126,11 @@ namespace MultiIO
             isDispensing = dispensed;
         }
 
-
-        private PrimaryElement FindSuitableElement()
+        /// <summary>
+        /// Advanced use only. If present, returns a PrimaryElement from storage that is suitable to dispensed through this port.
+        /// </summary>
+        /// <returns>A suitable PrimaryElement for this port to dispense.</returns>
+        public PrimaryElement FindSuitableElement()
         {
             List<GameObject> items = storage.items;
             int count = items.Count;
@@ -124,8 +150,12 @@ namespace MultiIO
             }
             return null;
         }
-
-        private bool MatchesConduit(PrimaryElement element)
+        /// <summary>
+        /// Advanced use only. Check the PrimaryElement to see if the element's state matches this ports ConduitType.
+        /// </summary>
+        /// <param name="element">The element to check.</param>
+        /// <returns>True if the element's state matches the ConduitType.</returns>
+        public bool MatchesConduit(PrimaryElement element)
         {
             if (ConduitType == ConduitType.Gas)
                 return element.Element.IsGas;
@@ -136,7 +166,12 @@ namespace MultiIO
                 return element.GetComponent<Pickupable>() != null;
             return false;
         }
-        private bool MatchesFilter(SimHashes element)
+        /// <summary>
+        /// Advanced use only. Check if the given element should be filtered out by the output.
+        /// </summary>
+        /// <param name="element">The element to check.</param>
+        /// <returns>True if the element matches the filter.</returns>
+        public bool MatchesFilter(SimHashes element)
         {
             foreach (SimHashes filter in ElementFilter)
             {
@@ -146,7 +181,11 @@ namespace MultiIO
             return InvertElementFilter;
         }
 
-        protected override void UpdateConduitExistsStatus(bool force = false)
+        /// <summary>
+        /// Advanced use only. Update the Conduit Exists status item if necessary, as well the guid item.
+        /// </summary>
+        /// <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
+        public override void UpdateConduitExistsStatus(bool force = false)
         {
             bool connected = !RequiresConnection || RequireOutputs.IsConnected(portCell, ConduitType);
             //No need to trigger operational/gui change if we would set them to what they already are.
@@ -164,7 +203,7 @@ namespace MultiIO
             else if (ConduitType == ConduitType.Solid)
                 status = Db.Get().BuildingStatusItems.NeedSolidOut;
             else
-                throw new ArgumentOutOfRangeException("OutputPort.UpdateConduitExistsStatus() Dispenser's conduit type was not a valid option");
+                throw new ArgumentOutOfRangeException("[MultiIO] OutputPort.UpdateConduitExistsStatus() Dispenser's conduit type was not a valid option");
 
             bool guidExists = NeedsConduitStatusItemGuid != Guid.Empty;
 
@@ -174,6 +213,10 @@ namespace MultiIO
             }
         }
 
+        /// <summary>
+        /// Advanced use only. Update the StatusItem and Operational component of the conduit.
+        /// </summary>
+        /// <param name="force">Force the checks to occur, even if the empty status has not changed.</param>
         private void UpdateConduitBlockedStatus(bool force = false)
         {
             IConduitFlow flowManager = this.GetConduitManager();

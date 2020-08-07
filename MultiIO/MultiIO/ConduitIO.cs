@@ -111,7 +111,7 @@ namespace MultiIO
         protected int portCell = -1;
         public GameObject CellVisualizer = null;
 
-        protected IConduitFlow GetConduitManager()
+        public IConduitFlow GetConduitManager()
         {
 
             if (ConduitType == ConduitType.Gas)
@@ -135,7 +135,7 @@ namespace MultiIO
             return portCell;
         }
 
-        protected ObjectLayer GetConduitObjectLayer()
+        public ObjectLayer GetConduitObjectLayer()
         {
             if (ConduitType == ConduitType.Gas)
                 return ObjectLayer.GasConduit;
@@ -147,7 +147,7 @@ namespace MultiIO
             return ObjectLayer.GasConduit;
         }
 
-        protected abstract void UpdateConduitExistsStatus(bool force = false);
+        public abstract void UpdateConduitExistsStatus(bool force = false);
 
         protected abstract void ConduitTick(float delta);
 

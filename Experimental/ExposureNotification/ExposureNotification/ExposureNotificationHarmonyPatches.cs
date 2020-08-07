@@ -4,7 +4,6 @@ using Harmony;
 using Klei.AI;
 using UnityEngine;
 
-
 namespace ExposureNotification
 {
     public class ExposureNotificationHarmonyPatches

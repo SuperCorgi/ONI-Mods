@@ -53,9 +53,13 @@ namespace MultiIO
         private bool PreviouslyConnected = false;
         private static readonly Operational.Flag inputConnectedFlag = new Operational.Flag("input_conduit", Operational.Flag.Type.Requirement);
         private Guid NeedsConduitStatusItemGuid;
+        private Action<InputPort> conduitUpdateCallback = null;
 
-
-        protected override void UpdateConduitExistsStatus(bool force = false)
+        /// <summary>
+        /// Advanced use only. Update the Conduit Exists status item if necessary, as well the guid item.
+        /// </summary>
+        /// <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
+        public override void UpdateConduitExistsStatus(bool force = false)
         {
             bool connected = !RequiresConnection || RequireOutputs.IsConnected(portCell, ConduitType);
             //No need to trigger operational/gui change if we are changing to what they already are.
@@ -84,8 +88,28 @@ namespace MultiIO
             PreviouslyConnected = connected;
 
         }
+        /// <summary>
+        /// Advanced use. Override the Input Port's default ConduitTick function with a custom function.
+        /// </summary>
+        public void ChangeConduitUpdater(Action<InputPort> callback)
+        {
+            conduitUpdateCallback = callback;
+        }
+
         protected override void ConduitTick(float delta)
         {
+            if(conduitUpdateCallback != null)
+            {
+                try
+                {
+                    conduitUpdateCallback(this);
+                }
+                catch(Exception ex)
+                {
+                    string msg = "[MultiIO] InputPort.ConduitTick(delta) -> A custom Conduit Updater was defined but an exception was thrown within it";
+                    throw new Exception(msg, ex);
+                }
+            }
             if (!AlwaysConsume && !operational.IsOperational)
                 return;
             IConduitFlow conduitFlow = GetConduitManager();
