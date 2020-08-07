@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Harmony;
 using Klei.AI;
 using UnityEngine;
-
+using System.Linq;
 namespace ExposureNotification
 {
     public class ExposureNotificationHarmonyPatches
@@ -14,14 +14,14 @@ namespace ExposureNotification
         private static LocString DUPE_EXPOSED_TO_GERMS_TOOLTIP = "The following Duplicants have been exposed to {0}:";
         private static bool MinionsLoaded = false;
 
-        private static void CreateAndAddNotification(GermExposureMonitor.Instance monitor, string sicknessName)
+        private static void CreateAndAddNotification(GermExposureMonitor.Instance monitor, string sicknessName, string sickness_id)
         {
             string text = string.Format(DUPE_EXPOSED_TO_GERMS_NOTIFICATION, sicknessName);
             Notification.ClickCallback callback = new Notification.ClickCallback(Notification_Callback);
             MinionIdentity minion = monitor.gameObject.GetComponent<MinionIdentity>();
             Notification notification = new Notification(text, NotificationType.BadMinor, HashedString.Invalid,
-                (List<Notification> n, object d) => string.Format(DUPE_EXPOSED_TO_GERMS_TOOLTIP, sicknessName) + n.ReduceMessages(true),
-                null, false, 0, callback, minion);
+                (List<Notification> n, object d) => string.Format(DUPE_EXPOSED_TO_GERMS_TOOLTIP, sicknessName) + ReduceNotifications(n, d),
+                sickness_id, false, 0, callback, minion);
             monitor.gameObject.AddOrGet<Notifier>().Add(notification);
             Action<object> act = null;
             act = x =>
@@ -32,6 +32,23 @@ namespace ExposureNotification
             };
             monitor.Subscribe((int)GameHashes.SleepFinished, act);
             monitor.Subscribe((int)GameHashes.DuplicantDied, act);
+        }
+
+        private static string ReduceNotifications(List<Notification> list, object tooltipData)
+        {
+            string text = "";
+            foreach (Notification n in list)
+            {
+                MinionIdentity minion = (MinionIdentity)n.customClickData;
+                string sickness_id = (string)tooltipData;
+                string name = n.NotifierName;
+                ExposureType type = TUNING.GERM_EXPOSURE.TYPES.First(x => x.sickness_id == sickness_id);
+                GermExposureMonitor.Instance smi = minion.GetSMI<GermExposureMonitor.Instance>();
+                float chance = ((!type.infect_immediately) ? GermExposureMonitor.GetContractionChance(smi.GetResistanceToExposureType(type, -1f)) : 1f);
+                string contractionChance = GameUtil.GetFormattedPercent(chance * 100);
+                text = text + $"\n{name} - {contractionChance}";
+            }
+            return text;
         }
 
 
@@ -63,7 +80,7 @@ namespace ExposureNotification
                     string sicknessName = sickness != null ? sickness.Name : "a disease";
                     string text = string.Format(DUPE_EXPOSED_TO_GERMS_POPFX, sicknessName);
                     PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, text, __instance.gameObject.transform, 3f, true);
-                    CreateAndAddNotification(__instance, sicknessName);
+                    CreateAndAddNotification(__instance, sicknessName, exposure_type.sickness_id);
                 }
             }
         }
@@ -94,7 +111,7 @@ namespace ExposureNotification
                             {
                                 Sickness sickness = Db.Get().Sicknesses.Get(exposure.sickness_id);
                                 string sicknessName = sickness != null ? sickness.Name : "a disease";
-                                CreateAndAddNotification(monitor, sicknessName);
+                                CreateAndAddNotification(monitor, sicknessName, exposure.sickness_id);
                             }
                         }
                     }
