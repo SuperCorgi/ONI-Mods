@@ -4,6 +4,7 @@
 
 *.sln
 *.csproj
+*.csproj.user
 bin
 Properties
 obj
