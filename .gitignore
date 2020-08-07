@@ -8,3 +8,4 @@ bin
 Properties
 obj
 .vs
+/standard_postbuild.txt
