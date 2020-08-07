@@ -24,6 +24,31 @@
             True if a connection to a conduit connection to this port is required for the building to operate.
             </summary>
         </member>
+        <member name="T:MultiIO.InputPort">
+            <summary>
+            A single instance of an Output Port associated to a MultiOutput component. Behaves similarily to ConduitDispenser but works with the parent MultiOutput to permit multiple outputs while being highly configurable.
+            </summary>
+        </member>
+        <member name="T:MultiIO.InputPort.WrongElementResult">
+            <summary>
+            Specifies what should be done when an element not matching a specified filter is encountered by the port.
+            </summary>
+        </member>
+        <member name="F:MultiIO.InputPort.WrongElementResult.Destroy">
+            <summary>
+            Destroy the material being input. Not typically used.
+            </summary>
+        </member>
+        <member name="F:MultiIO.InputPort.WrongElementResult.Dump">
+            <summary>
+            Dump the material out of the pipes.
+            </summary>
+        </member>
+        <member name="F:MultiIO.InputPort.WrongElementResult.Store">
+            <summary>
+            Continue to store the material. Will still damage the associated building this port is attached to.
+            </summary>
+        </member>
         <member name="F:MultiIO.InputPort.WrongElement">
             <summary>
             Defines what should occur when the conduit provides an element that does not match StoreTag. Solid ports will always drop.
@@ -109,6 +134,11 @@
             <param name="invertElementFilter">If the ElementFilter is defined, true will make the filter act as a blacklist, false will make the filter act as a whitelist.</param>
             <returns>A reference to the OutputPort that has already been attached as a child component.</returns>
         </member>
+        <member name="T:MultiIO.OutputPort">
+            <summary>
+            A single instance of an Output Port associated to a MultiOutput component. Behaves similarily to ConduitDispenser but works with the parent MultiOutput to permit multiple outputs while being highly configurable.
+            </summary>
+        </member>
         <member name="F:MultiIO.OutputPort.ElementFilter">
             <summary>
             If defined, used to determine which elements to pull from the buildings storage and out into a connected conduit.
@@ -126,6 +156,11 @@
         </member>
         <member name="F:MultiIO.OutputPort.SolidOutputMax">
             <summary>Default 20f (20KG). Conveyor rails have no built in maximum.</summary>
+        </member>
+        <member name="P:MultiIO.OutputPort.FlowPriority">
+            <summary>
+            Advanced use only. Should only be changed when overriding ConduitUpdate behavior of the ports.
+            </summary>
         </member>
         <member name="M:MultiIO.OutputPort.ChangeConduitUpdater(System.Action{MultiIO.OutputPort})">
             <summary>
