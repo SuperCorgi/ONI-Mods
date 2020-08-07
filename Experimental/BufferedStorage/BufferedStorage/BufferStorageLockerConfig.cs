@@ -3,6 +3,7 @@ using TUNING;
 using UnityEngine;
 namespace BufferedStorage
 {
+    //DEPRECATED
     public class BufferStorageLockerConfig : IBuildingConfig
     {
         public const string ID = "BufferStorageLocker";
