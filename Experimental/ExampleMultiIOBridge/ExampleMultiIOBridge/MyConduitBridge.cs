@@ -27,6 +27,9 @@ namespace ExampleMultiIOBridge
             base.OnPrefabInit();
             //Add an input port to the building. It does not have an intake limit specified, but our ConduitUpdater will handle that logic anyway. It can not store any mass inside of the building, and can accept any type.
             inputPort = multiIn.AddInputPort(conduitType, inputOffset, float.PositiveInfinity, 0f, GameTags.Any, false, InputPort.WrongElementResult.Store, false);
+            //The flow priority determines the order of when different Conduit Updaters are executed. Default inputPort is First, however we are overriding the inputPort to act on behalf of the entire building instead, and buildings typically
+            //  have a priority of Default.
+            inputPort.FlowPriority = ConduitFlowPriority.Default;
             //Add an output port to the building. It is specified to not always attempt to dispense, though again our custom updater will handle that logic
             outputPort = multiOut.AddOutputPort(conduitType, outputOffset, false);
             //When the input port is updating, have it use our own custom ConduitTick function.
