@@ -25,20 +25,19 @@ namespace ExampleMultiIOBridge
         protected override void OnPrefabInit()
         {
             base.OnPrefabInit();
-            //Add an input port to the building. It does not have an intake limit specified, but our ConduitUpdater will handle that logic anyway. It can not store any mass inside of the building, and can accept any type.
-            inputPort = multiIn.AddInputPort(conduitType, inputOffset, float.PositiveInfinity, 0f, GameTags.Any, false, InputPort.WrongElementResult.Store, false);
-            //The flow priority determines the order of when different Conduit Updaters are executed. Default inputPort is First, however we are overriding the inputPort to act on behalf of the entire building instead, and buildings typically
-            //  have a priority of Default.
-            inputPort.FlowPriority = ConduitFlowPriority.Default;
-            //Add an output port to the building. It is specified to not always attempt to dispense, though again our custom updater will handle that logic
-            outputPort = multiOut.AddOutputPort(conduitType, outputOffset, false);
-            //When the input port is updating, have it use our own custom ConduitTick function.
-            inputPort.ChangeConduitUpdater(OnConduitTick);
-            //The input port will handle ConduitTick logic, so the output port will do nothing
-            outputPort.ChangeConduitUpdater(x => { });
+            //Add an inert input and output port to the building. Inert ports do not automatically perform any behavior such as automatically taking in, outtputing, or filtering. The behavior is expected to be implemented by the Building when
+            //using inert ports. 
+            inputPort = multiIn.AddInputPortInert(conduitType, inputOffset);
+            outputPort = multiOut.AddOutputPortInert(conduitType, outputOffset);
+            //We can use input or output port, since they both give us the same manager.
+            IConduitFlow conduitFlow = inputPort.GetConduitManager();
+            //Buildings such as pipes, bridges, valves, and shutoffs have a default priority, meaning they execute after consumers but before dispensers.
+            conduitFlow.AddConduitUpdater(OnConduitTick, ConduitFlowPriority.Default);
         }
-        //We don't need the input port in this case since it is already stored in this instance
-        private void OnConduitTick(InputPort input)
+
+        //Since our input/output ports are inert, we must define the behavior of the ports ourself.
+        //float dt is the amount of time that has passed. typically not used as far as i am aware, likely always just 1 (1 second)
+        private void OnConduitTick(float dt)
         {
             //The ConduitFlow task is an overarching flow manager for a specific conduit type. If our bridge is a liquid bridge, we will get the liquid manager.
             ConduitFlow flowManager = Conduit.GetFlowManager(conduitType);
