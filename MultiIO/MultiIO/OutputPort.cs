@@ -67,13 +67,14 @@ namespace MultiIO
             {
                 return;
             }
-            foreach (GameObject item in storage.items)
-            {
-                if (item.GetComponent<PrimaryElement>()?.Element.id == SimHashes.Water)
-                {
-                    item.AddOrGet<Pickupable>();
-                }
-            }
+            //Could this have been testing to see how to make water pickupable?
+            //foreach (GameObject item in storage.items)
+            //{
+            //    if (item.GetComponent<PrimaryElement>()?.Element.id == SimHashes.Water)
+            //    {
+            //        item.AddOrGet<Pickupable>();
+            //    }
+            //}
             PrimaryElement element = FindSuitableElement();
 
             if (element != null)

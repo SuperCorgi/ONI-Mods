@@ -95,7 +95,7 @@ namespace MultiIO
         }
 
         [SerializeField]
-        private bool _useConduitUpdater = false;
+        private bool _useConduitUpdater = true;
 
         /// <summary>
         /// If set to false, this port will not execute any default behavior for conduit updates. Only do this if the building will implement its own behavior for conduit updates.

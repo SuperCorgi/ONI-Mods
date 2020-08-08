@@ -15,19 +15,13 @@ namespace PipedRustDeoxidizer
             }
         }
 
-        //public class State : GameStateMachine<States, StatesInstance, PipedRustDeoxidizer, object>.State
-        //{
-
-        //}
-
-
         public class States : GameStateMachine<States, StatesInstance, PipedRustDeoxidizer>
         {
 
             public State off;
             public State on;
             public State converting;
-            public State overpressure;
+            //public State overpressure;
 
             public override void InitializeStates(out BaseState default_state)
             {
@@ -46,20 +40,6 @@ namespace PipedRustDeoxidizer
         {
             bool canConvert = smi.master.converter.CanConvertAtAll();
             return canConvert;
-            //Storage storage = smi.master.storage;
-            //List<GameObject> items = storage.items;
-            //foreach(GameObject item in items)
-            //{
-            //    PrimaryElement element = item.GetComponent<PrimaryElement>();
-            //    if(element != null && element.Mass > 1f)
-            //    {
-            //        if (element.ElementID == SimHashes.Oxygen || element.ElementID == SimHashes.ChlorineGas)
-            //        {
-            //            return false;
-            //        }
-            //    }
-            //}
-            //return true;
         }
 
         [SerializeField]

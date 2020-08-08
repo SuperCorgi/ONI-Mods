@@ -104,8 +104,8 @@ namespace PipedRustDeoxidizer
 
             elementConverter.outputElements = new ElementConverter.OutputElement[3]
             {
-                new ElementConverter.OutputElement(1.8f, SimHashes.Oxygen, OXYGEN_TEMPERATURE, false, true, 0.0f, 1f, 1f, byte.MaxValue, 0),
-                new ElementConverter.OutputElement(1f, SimHashes.ChlorineGas, OXYGEN_TEMPERATURE, false, true, 0.0f, 1f, 1f, byte.MaxValue, 0),
+                new ElementConverter.OutputElement(OXYGEN_CONVERSION_RATIO, SimHashes.Oxygen, OXYGEN_TEMPERATURE, false, true, 0.0f, 1f, 1f, byte.MaxValue, 0),
+                new ElementConverter.OutputElement(CHLORINE_CONVERSION_RATIO, SimHashes.ChlorineGas, OXYGEN_TEMPERATURE, false, true, 0.0f, 1f, 1f, byte.MaxValue, 0),
                 new ElementConverter.OutputElement(IRON_CONVERSION_RATIO, SimHashes.IronOre, OXYGEN_TEMPERATURE, false, true, 0.0f, 1f, 1f, byte.MaxValue, 0)
             };
             //elementConverter.outputElements = new ElementConverter.OutputElement[3]
@@ -125,7 +125,6 @@ namespace PipedRustDeoxidizer
         {
             go.AddOrGet<LogicOperationalController>();
             go.AddOrGetDef<PoweredActiveController.Def>();
-            go.AddOrGet<BuildingNotificationButton>();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Database;
 using Harmony;
 using System.Collections.Generic;
-
+using STRINGS;
 namespace PipedRustDeoxidizer
 {
     public class HarmonyPatches
@@ -16,10 +16,11 @@ namespace PipedRustDeoxidizer
                 string str = "STRINGS.BUILDINGS.PREFABS." + PipedRustDeoxidizerConfig.ID.ToUpper();
                 Strings.Add(str + ".NAME", "Piped Rust Deoxidizer");
                 Strings.Add(str + ".DESC", "Rust and salt goes in, oxygen goes out. Now piped!");
-                //Strings.Add(str + "Converts " + UI.FormatAsLink("Rust", "RUST") + " into " + UI.FormatAsLink("Oxygen", "OXYGEN") + " and " + UI.FormatAsLink("Chlorine", "CHLORINE") + ".\n\nUpgraded with refined metals and plastic, this version prevents gasses from escaping the machine. Extra power is used to separate the gasses and send into dedicated pipes.");
+                Strings.Add(str + ".EFFECT", "Converts " + UI.FormatAsLink("Rust", "RUST") + " into " + UI.FormatAsLink("Oxygen", "OXYGEN") + " and " + UI.FormatAsLink("Chlorine", "CHLORINE") + ".\n\nUpgraded with refined metals and plastic, this version prevents gasses from escaping the machine. Extra power is used to separate the gasses and send into dedicated pipes.");
                 ModUtil.AddBuildingToPlanScreen("Oxygen", PipedRustDeoxidizerConfig.ID);
             }
         }
+
         //Defines what research this should appear in
         [HarmonyPatch(typeof(Db))]
         [HarmonyPatch("Initialize")]
@@ -33,5 +34,5 @@ namespace PipedRustDeoxidizer
                 }.ToArray();
             }
         }
-    } //End HarmonyPatches class
-} //End Namespace
+    }
+}
