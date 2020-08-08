@@ -1,6 +1,6 @@
 ﻿using KSerialization;
 using UnityEngine;
-namespace PressurizedPipes
+namespace PressurizedPipes.Components
 {
     [SerializationConfig(MemberSerialization.OptIn)]
     public class Pressurized : KMonoBehaviour, ISaveLoadable

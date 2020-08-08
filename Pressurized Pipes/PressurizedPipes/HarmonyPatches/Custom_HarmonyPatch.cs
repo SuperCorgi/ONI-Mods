@@ -5,7 +5,8 @@ using System.Reflection.Emit;
 using Harmony;
 using System.Reflection;
 using UnityEngine;
-namespace PressurizedPipes
+using PressurizedPipes.Components;
+namespace PressurizedPipes.HarmonyPatches
 {
     public static class CustomPatcher
     {

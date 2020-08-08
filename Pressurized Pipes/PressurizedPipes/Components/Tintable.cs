@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-
-namespace PressurizedPipes
+using PressurizedPipes.BuildingConfigs;
+namespace PressurizedPipes.Components
 {
     /*
      *  To simplify the logic to tint buildings. The PressurizedTuning class contains information that pertains specifically to Conduit and ConduitBridges.

@@ -1,6 +1,7 @@
 ﻿using TUNING;
 using UnityEngine;
-namespace PressurizedPipes
+using PressurizedPipes.Components;
+namespace PressurizedPipes.BuildingConfigs
 {
     public class PressurizedGasValveConfig : IBuildingConfig
     {

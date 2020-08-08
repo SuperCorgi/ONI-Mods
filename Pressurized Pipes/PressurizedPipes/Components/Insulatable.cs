@@ -4,7 +4,8 @@ using STRINGS;
 using UnityEngine;
 using KSerialization;
 using System.Runtime.Serialization;
-namespace PressurizedPipes
+using PressurizedPipes.BuildingConfigs;
+namespace PressurizedPipes.Components
 {
     [SerializationConfig(MemberSerialization.OptIn)]
     public class Insulatable : Workable, IVersion

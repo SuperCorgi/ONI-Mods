@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using KSerialization;
 
-namespace PressurizedPipes
+namespace PressurizedPipes.Components
 {
     [SerializationConfig(MemberSerialization.OptIn)]
     public class TogglableValve : Valve

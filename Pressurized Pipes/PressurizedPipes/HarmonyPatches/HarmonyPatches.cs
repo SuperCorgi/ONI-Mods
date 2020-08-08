@@ -6,9 +6,11 @@ using System.Reflection.Emit;
 using UnityEngine;
 using System.Linq;
 using STRINGS;
-namespace PressurizedPipes
+using PressurizedPipes.BuildingConfigs;
+using PressurizedPipes.Components;
+namespace PressurizedPipes.HarmonyPatches
 {
-    internal static class HarmonyPatches
+    internal static partial class HarmonyPatches
     {
         //MaxMass is used by:
         //ConduitFlow.UpdateConduit
@@ -183,171 +185,8 @@ namespace PressurizedPipes
             }
         }
 
-        //To change the color of how our pressurized pipes are displayed in their respective overlay
-        [HarmonyPatch(typeof(OverlayModes.ConduitMode), "Update")]
-        internal static class Patch_OvererlayModesConduitMode_Update
-        {
-            internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original)
-            {
-                MethodBase patch = AccessTools.Method(typeof(Patch_OvererlayModesConduitMode_Update), nameof(PatchThermalColor));
-                //SaveLoadRoot layerTarget;
-                int layerTargetIdx = 12;
-                //Color32 color;
-                int tintColourIdx = 14;
-                bool foundVar = false;
-                LocalVariableInfo layerTargetInfo = original.GetMethodBody().LocalVariables.FirstOrDefault(x => x.LocalIndex == layerTargetIdx);
-                foundVar = layerTargetInfo != default(LocalVariableInfo);
-                if (!foundVar)
-                    Debug.LogError($"[Pressurized] OverlayModes.ConduitMode.Update() Transpiler -> Local variable signatures did not match expected signatures");
 
-                foreach (CodeInstruction code in instructions)
-                {
-                    if (foundVar && code.opcode == OpCodes.Stloc_S && (code.operand as LocalVariableInfo)?.LocalIndex == tintColourIdx)
-                    {
-                        //PatchThermalColor(color, layerTarget)
-                        yield return new CodeInstruction(OpCodes.Ldloc_S, layerTargetIdx);
-                        yield return new CodeInstruction(OpCodes.Call, patch);
-                    }
-                    yield return code;
-                }
-            }
-            private static HashSet<int> cells = new HashSet<int>();
-            private static HashSet<int> cells2 = new HashSet<int>();
-            //Change the overlay tint for the pipe if it is a pressurized pipe.
-            private static Color32 PatchThermalColor(Color32 original, SaveLoadRoot layerTarget)
-            {
-                Pressurized pressurized = layerTarget.GetComponent<Pressurized>();
-                if (pressurized != null && pressurized.Info != null && !pressurized.Info.IsDefault)
-                    return pressurized.Info.OverlayTint;
-                else
-                    return original;
-            }
-        }
-
-        //Modify MaxMass if needed for pressurized pipes when adding elements to a pipe
-        [HarmonyPatch(typeof(ConduitFlow), "AddElement")]
-        internal static class Patch_ConduitFlow_AddElement
-        {
-
-            internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                CodeInstruction getCellInstruction = new CodeInstruction(OpCodes.Ldarg_1); //int cell_idx : The first argument of the method being called (Ldarg_0 is the instance (this) reference)
-                foreach (CodeInstruction code in instructions)
-                {
-                    foreach (CodeInstruction result in Integration.AddIntegrationIfNeeded(code, getCellInstruction))
-                    {
-                        yield return result;
-                    }
-                }
-
-            }
-        }
-
-        //Modify MaxMass if needed for pressurized pipes when update conduits. Also include overpressure integration
-        [HarmonyPatch(typeof(ConduitFlow), "UpdateConduit")]
-        internal static class Patch_ConduitFlow_UpdateConduit
-        {
-            internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                //variable: int cell2;
-                //This variable is used for the patch to determine the cell of the conduit being updated. The cell is then used in determining what its MaxMass (max capacity) should be
-                CodeInstruction getCellInstruction = new CodeInstruction(OpCodes.Ldloc_S, 13);
-                foreach (CodeInstruction code in instructions)
-                {
-                    foreach (CodeInstruction result in Integration.AddIntegrationIfNeeded(code, getCellInstruction, true))
-                    {
-                        yield return result;
-                    }
-                }
-
-            }
-        }
-
-        //Modify MaxMass if needed for pressurized pipes when determining if the conduit is full.
-        [HarmonyPatch(typeof(ConduitFlow), "IsConduitFull")]
-        internal static class Patch_ConduitFlow_IsConduitFull
-        {
-            internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                CodeInstruction getCellInstruction = new CodeInstruction(OpCodes.Ldarg_1); //int cell_idx : The first argument of the method being called (Ldarg_0 is the instance (this) reference)
-                foreach (CodeInstruction code in instructions)
-                {
-                    foreach (CodeInstruction result in Integration.AddIntegrationIfNeeded(code, getCellInstruction))
-                    {
-                        yield return result;
-                    }
-                }
-            }
-        }
-
-        //When Deserializing the contents inside of Conduits, the method will normally prevent the deserialized data from being higher than the built-in ConduitFlow MaxMass.
-        //Instead, replace the max mass with infinity so the serialized mass will always be used.
-        //Must be done this way because OnDeserialized is called before the Conduits are spawned, so no information is available as to what the max mass is supposed to be
-        [HarmonyPatch(typeof(ConduitFlow), "OnDeserialized")]
-        internal static class Patch_ConduitFlow_OnDeserialized
-        {
-            internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                MethodInfo patch = AccessTools.Method(typeof(Patch_ConduitFlow_OnDeserialized), "ReplaceMaxMass");
-                foreach (CodeInstruction original in instructions)
-                {
-                    if (original.opcode == OpCodes.Ldfld && (original.operand as FieldInfo) == maxMass)
-                    {
-                        yield return original;
-                        yield return new CodeInstruction(OpCodes.Call, patch);
-                    }
-                    else
-                        yield return original;
-                }
-            }
-
-            internal static float ReplaceMaxMass(float original)
-            {
-                return float.PositiveInfinity;
-            }
-        }
-
-        //Prevent the game from marking our pipes as radiant or insulated. Otherwise, overlay tints will not properly appear.
-        [HarmonyPatch(typeof(ConduitFlowVisualizer), "AddThermalConductivity")]
-        internal static class Patch_ConduitFlowVisualizer_AddThermalConductivity
-        {
-            private static readonly FieldInfo conduitType = AccessTools.Field(typeof(ConduitFlow), "conduitType");
-
-            internal static void Prefix(ConduitFlowVisualizer __instance, int cell, ref float conductivity, ConduitFlow ___flowManager)
-            {
-                Pressurized pressure = Integration.GetPressurizedAt(cell, (ConduitType)conduitType.GetValue(___flowManager));
-                if (!Pressurized.IsDefault(pressure))
-                    conductivity = 1f;
-            }
-        }
-
-        //Prevent the game from attempting to remove our pipes from their list of radiant/insulated pipes, since our pipes will not be in those lists in the first place
-        [HarmonyPatch(typeof(ConduitFlowVisualizer), "RemoveThermalConductivity")]
-        internal static class Patch_ConduitFlowVisualizer_RemoveThermalConductivity
-        {
-            private static readonly FieldInfo conduitType = AccessTools.Field(typeof(ConduitFlow), "conduitType");
-
-            internal static void Prefix(ConduitFlowVisualizer __instance, int cell, ref float conductivity, ConduitFlow ___flowManager)
-            {
-                Pressurized pressure = Integration.GetPressurizedAt(cell, (ConduitType)conduitType.GetValue(___flowManager));
-                if (!Pressurized.IsDefault(pressure))
-                    conductivity = 1f;
-            }
-        }
-
-        //Specifically changes the color of the flowing contents that appear in conduits without an overlay
-        [HarmonyPatch(typeof(ConduitFlowVisualizer), "GetCellTintColour")]
-        internal static class Patch_ConduitFlowVisualizer_GetCellTintColour
-        {
-            private static readonly FieldInfo conduitType = AccessTools.Field(typeof(ConduitFlow), "conduitType");
-
-            internal static void Postfix(ConduitFlowVisualizer __instance, int cell, ConduitFlow ___flowManager, bool ___showContents, ref Color32 __result)
-            {
-                Pressurized pressure = Integration.GetPressurizedAt(cell, (ConduitType)conduitType.GetValue(___flowManager));
-                if (!Pressurized.IsDefault(pressure))
-                    __result = ___showContents ? pressure.Info.FlowOverlayTint : pressure.Info.FlowTint;
-            }
-        }
+        
 
         //Integrate overpressure damage when a Gas or Liquid Shutoff has too much pressure in the receiving pipe for the output pipe to handle.
         //The shutoff valves have a built-in limit, but has been overriden with a different harmony patch
