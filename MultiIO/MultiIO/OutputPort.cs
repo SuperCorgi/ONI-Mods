@@ -28,7 +28,6 @@ namespace MultiIO
         ///<summary>Default 20f (20KG). Conveyor rails have no built in maximum.</summary>
         [SerializeField]
         protected float SolidOutputMax = 20f;
-        private Action<OutputPort> conduitUpdateCallback = null;
 
         protected override Endpoint EndpointType => Endpoint.Source;
         private ConduitFlowPriority flowPriority = ConduitFlowPriority.Dispense;
@@ -59,28 +58,9 @@ namespace MultiIO
         //LIKELY DEAD CODE. NEVER USED AT THIS TIME.
         private bool isDispensing = false;
 
-        /// <summary>
-        /// Advanced use. Override the Input Port's default ConduitTick function with a custom function.
-        /// </summary>
-        public void ChangeConduitUpdater(Action<OutputPort> callback)
-        {
-            conduitUpdateCallback = callback;
-        }
 
         protected override void ConduitTick(float delta)
         {
-            if (conduitUpdateCallback != null)
-            {
-                try
-                {
-                    conduitUpdateCallback(this);
-                }
-                catch (Exception ex)
-                {
-                    string msg = "[MultiIO] InputPort.ConduitTick(delta) -> A custom Conduit Updater was defined but an exception was thrown within it";
-                    throw new Exception(msg, ex);
-                }
-            }
             UpdateConduitBlockedStatus();
             bool dispensed = false;
             if (!operational.IsOperational && !AlwaysDispense)
@@ -145,7 +125,7 @@ namespace MultiIO
         }
 
         /// <summary>
-        /// Advanced use only. If present, returns a PrimaryElement from storage that is suitable to dispensed through this port.
+        /// If present, returns a PrimaryElement from storage that is suitable to be dispensed through this port.
         /// </summary>
         /// <returns>A suitable PrimaryElement for this port to dispense.</returns>
         public PrimaryElement FindSuitableElement()
@@ -169,7 +149,7 @@ namespace MultiIO
             return null;
         }
         /// <summary>
-        /// Advanced use only. Check the PrimaryElement to see if the element's state matches this ports ConduitType.
+        /// Check the PrimaryElement to see if the element's state matches this ports ConduitType.
         /// </summary>
         /// <param name="element">The element to check.</param>
         /// <returns>True if the element's state matches the ConduitType.</returns>
@@ -185,7 +165,7 @@ namespace MultiIO
             return false;
         }
         /// <summary>
-        /// Advanced use only. Check if the given element should be filtered out by the output.
+        /// Check if the given element should be filtered out by the output.
         /// </summary>
         /// <param name="element">The element to check.</param>
         /// <returns>True if the element matches the filter.</returns>
@@ -200,7 +180,7 @@ namespace MultiIO
         }
 
         /// <summary>
-        /// Advanced use only. Update the Conduit Exists status item if necessary, as well the guid item.
+        /// Update the Conduit Exists status item if necessary, as well the guid item.
         /// </summary>
         /// <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
         public override void UpdateConduitExistsStatus(bool force = false)
@@ -235,7 +215,7 @@ namespace MultiIO
         /// Advanced use only. Update the StatusItem and Operational component of the conduit.
         /// </summary>
         /// <param name="force">Force the checks to occur, even if the empty status has not changed.</param>
-        private void UpdateConduitBlockedStatus(bool force = false)
+        public void UpdateConduitBlockedStatus(bool force = false)
         {
             IConduitFlow flowManager = this.GetConduitManager();
             bool isEmpty = flowManager.IsConduitEmpty(portCell);

@@ -24,6 +24,41 @@
             True if a connection to a conduit connection to this port is required for the building to operate.
             </summary>
         </member>
+        <member name="P:MultiIO.ConduitIO.UseConduitUpdater">
+            <summary>
+            If set to false, this port will not execute any default behavior for conduit updates. Only do this if the building will implement its own behavior for conduit updates.
+            </summary>
+        </member>
+        <member name="M:MultiIO.ConduitIO.GetConduitManager">
+            <summary>
+            Returns the IConduitFlow instance this port is managed by, based on its specified ConduitType.
+            </summary>
+            <returns>The IConduitFlow instance for this port.</returns>
+        </member>
+        <member name="M:MultiIO.ConduitIO.GetPortCell">
+            <summary>
+            Get the integer cell position of this port.
+            </summary>
+            <returns>The integer cell position of this port.</returns>
+        </member>
+        <member name="M:MultiIO.ConduitIO.GetConduitObjectLayer">
+            <summary>
+            Get the ObjectLayer of the conduits for the associated ConduitType of this port.
+            </summary>
+            <returns>The associated ObjectLayer for conduits.</returns>
+        </member>
+        <member name="M:MultiIO.ConduitIO.UpdateConduitExistsStatus(System.Boolean)">
+            <summary>
+            Update the Conduit Exists status item if necessary, as well the guid item.
+            </summary>
+            <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
+        </member>
+        <member name="M:MultiIO.ConduitIO.GetNetworkManager">
+            <summary>
+            Get the IUtilityNetworkMgr associated with this ports Conduit Type.
+            </summary>
+            <returns>The associated IUtilityNetworkMgr.</returns>
+        </member>
         <member name="T:MultiIO.InputPort">
             <summary>
             A single instance of an Output Port associated to a MultiOutput component. Behaves similarily to ConduitDispenser but works with the parent MultiOutput to permit multiple outputs while being highly configurable.
@@ -85,10 +120,56 @@
             </summary>
             <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
         </member>
-        <member name="M:MultiIO.InputPort.ChangeConduitUpdater(System.Action{MultiIO.InputPort})">
+        <member name="T:MultiIO.MultiInput">
             <summary>
-            Advanced use. Override the Input Port's default ConduitTick function with a custom function.
+            A component that facilities adding multiple input ports to a building while also handling much of their typical logic.
             </summary>
+        </member>
+        <member name="M:MultiIO.MultiInput.AddInputPort(ConduitType,CellOffset,Tag,UnityEngine.Color,System.Single,System.Single,System.Boolean,MultiIO.InputPort.WrongElementResult,System.Boolean)">
+            <summary>
+            Adds an InputPort as a child Component to whatever building MultiInput is attached to. Behaves similar to a ConduitConsumer. This function can be used any number of times as long the ports remain valid.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <param name="iconColor">The color the port icon will appear as.</param>
+            <param name="consumptionRate">The maximum rate the input port should consume from the connected conduit.</param>
+            <param name="maximumStore">The maximum amount (KG) the conduit can store into the Storage component of the building.</param>
+            <param name="toStoreTag">Specifies a tag the input material must have for the port to accept it.</param>
+            <param name="alwaysConsume">Whether to stop consuming from the input if the building is not operational.</param>
+            <param name="wrongElementResult">What to do with a material if it does not match the specified toStoreTag param.</param>
+            <param name="keepZeroMassObject">Whether or not elements with zero mass should remain displayed in storage section of the details screen.</param>
+            <returns>The InputPort object that was added to the MultiInput.</returns>
+        </member>
+        <member name="M:MultiIO.MultiInput.AddInputPort(ConduitType,CellOffset,Tag,System.Single,System.Single,System.Boolean,MultiIO.InputPort.WrongElementResult,System.Boolean)">
+            <summary>
+            Adds an InputPort as a child Component to whatever building MultiInput is attached to. Behaves similar to a ConduitConsumer. This function can be used any number of times as long the ports remain valid.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <param name="consumptionRate">The maximum rate the input port should consume from the connected conduit.</param>
+            <param name="maximumStore">The maximum amount (KG) the conduit can store into the Storage component of the building.</param>
+            <param name="toStoreTag">Specifies a tag the input material must have for the port to accept it.</param>
+            <param name="alwaysConsume">Whether to stop consuming from the input if the building is not operational.</param>
+            <param name="wrongElementResult">What to do with a material if it does not match the specified toStoreTag param.</param>
+            <param name="keepZeroMassObject">Whether or not elements with zero mass should remain displayed in storage section of the details screen.</param>
+            <returns>The InputPort object that was added to the MultiInput.</returns>
+        </member>
+        <member name="M:MultiIO.MultiInput.AddInputPortInert(ConduitType,CellOffset,UnityEngine.Color)">
+            <summary>
+            Creates an inert input port that does not automatically handle Conduit Update behavior. The building must define its own behavior for the input port.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <param name="iconColor">The color the port icon will appear as.</param>
+            <returns></returns>
+        </member>
+        <member name="M:MultiIO.MultiInput.AddInputPortInert(ConduitType,CellOffset)">
+            <summary>
+            Creates an inert input port that does not automatically handle Conduit Update behavior. The building must define its own behavior for the input port.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <returns></returns>
         </member>
         <member name="P:MultiIO.MultiIO`1.PortList">
             <summary>
@@ -134,6 +215,23 @@
             <param name="invertElementFilter">If the ElementFilter is defined, true will make the filter act as a blacklist, false will make the filter act as a whitelist.</param>
             <returns>A reference to the OutputPort that has already been attached as a child component.</returns>
         </member>
+        <member name="M:MultiIO.MultiOutput.AddOutputPortInert(ConduitType,CellOffset,UnityEngine.Color)">
+            <summary>
+            Creates an inert output port that does not automatically handle Conduit Update behavior. The building must define its own behavior for the output port.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <param name="iconColor">The color the port icon will appear as.</param>
+            <returns></returns>
+        </member>
+        <member name="M:MultiIO.MultiOutput.AddOutputPortInert(ConduitType,CellOffset)">
+            <summary>
+            Creates an inert output port that does not automatically handle Conduit Update behavior. The building must define its own behavior for the output port.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <returns></returns>
+        </member>
         <member name="T:MultiIO.OutputPort">
             <summary>
             A single instance of an Output Port associated to a MultiOutput component. Behaves similarily to ConduitDispenser but works with the parent MultiOutput to permit multiple outputs while being highly configurable.
@@ -162,34 +260,29 @@
             Advanced use only. Should only be changed when overriding ConduitUpdate behavior of the ports.
             </summary>
         </member>
-        <member name="M:MultiIO.OutputPort.ChangeConduitUpdater(System.Action{MultiIO.OutputPort})">
-            <summary>
-            Advanced use. Override the Input Port's default ConduitTick function with a custom function.
-            </summary>
-        </member>
         <member name="M:MultiIO.OutputPort.FindSuitableElement">
             <summary>
-            Advanced use only. If present, returns a PrimaryElement from storage that is suitable to dispensed through this port.
+            If present, returns a PrimaryElement from storage that is suitable to be dispensed through this port.
             </summary>
             <returns>A suitable PrimaryElement for this port to dispense.</returns>
         </member>
         <member name="M:MultiIO.OutputPort.MatchesConduit(PrimaryElement)">
             <summary>
-            Advanced use only. Check the PrimaryElement to see if the element's state matches this ports ConduitType.
+            Check the PrimaryElement to see if the element's state matches this ports ConduitType.
             </summary>
             <param name="element">The element to check.</param>
             <returns>True if the element's state matches the ConduitType.</returns>
         </member>
         <member name="M:MultiIO.OutputPort.MatchesFilter(SimHashes)">
             <summary>
-            Advanced use only. Check if the given element should be filtered out by the output.
+            Check if the given element should be filtered out by the output.
             </summary>
             <param name="element">The element to check.</param>
             <returns>True if the element matches the filter.</returns>
         </member>
         <member name="M:MultiIO.OutputPort.UpdateConduitExistsStatus(System.Boolean)">
             <summary>
-            Advanced use only. Update the Conduit Exists status item if necessary, as well the guid item.
+            Update the Conduit Exists status item if necessary, as well the guid item.
             </summary>
             <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
         </member>

@@ -48,5 +48,32 @@ namespace MultiIO
             return AddOutputPort(conduitType, offset, iconColor, alwaysDispense, elementFilter, invertElementFilter);
         }
 
+        /// <summary>
+        /// Creates an inert output port that does not automatically handle Conduit Update behavior. The building must define its own behavior for the output port.
+        /// </summary>
+        /// <param name="conduitType">The type of conduit this port should attach to.</param>
+        /// <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+        /// <param name="iconColor">The color the port icon will appear as.</param>
+        /// <returns></returns>
+        public OutputPort AddOutputPortInert(ConduitType conduitType, CellOffset offset, Color iconColor)
+        {
+            OutputPort port = AddOutputPort(conduitType, offset, iconColor);
+            port.UseConduitUpdater = false;
+            return port;
+        }
+
+        /// <summary>
+        /// Creates an inert output port that does not automatically handle Conduit Update behavior. The building must define its own behavior for the output port.
+        /// </summary>
+        /// <param name="conduitType">The type of conduit this port should attach to.</param>
+        /// <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+        /// <returns></returns>
+        public OutputPort AddOutputPortInert(ConduitType conduitType, CellOffset offset)
+        {
+            OutputPort port = AddOutputPort(conduitType, offset);
+            port.UseConduitUpdater = false;
+            return port;
+        }
+
     }
 }

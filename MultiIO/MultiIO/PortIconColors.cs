@@ -4,7 +4,7 @@ namespace MultiIO
 {
     public static class PortIconColors
     {
-        public static Color StandardInput = Color.white;
+        public static readonly Color StandardInput = Color.white;
         public static Color StandardOutput = new Color(107f / 255f, 211f / 255f, 132f / 255f);
         public static Color SecondaryColor = new Color(251f / 255f, 176f / 255f, 59 / 255f);
         public static Color Oxygen = Assets.SubstanceTable.GetSubstance(SimHashes.Oxygen).conduitColour;

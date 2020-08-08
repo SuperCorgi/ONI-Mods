@@ -72,6 +72,10 @@ namespace MultiIO
                 mIconColor = value;
             }
         }
+
+        [SerializeField]
+        private bool _requiresConnection = true;
+
         /// <summary>
         /// True if a connection to a conduit connection to this port is required for the building to operate.
         /// </summary>
@@ -89,8 +93,29 @@ namespace MultiIO
                     _requiresConnection = value;
             }
         }
+
         [SerializeField]
-        private bool _requiresConnection = true;
+        private bool _useConduitUpdater = false;
+
+        /// <summary>
+        /// If set to false, this port will not execute any default behavior for conduit updates. Only do this if the building will implement its own behavior for conduit updates.
+        /// </summary>
+        public bool UseConduitUpdater
+        {
+            get
+            {
+                return _useConduitUpdater;
+            }
+            set
+            {
+                if (_spawned)
+                    Debug.LogError($"[MultiIO] ConduitIO.RequiresConnection.set() -> Attempted to change RequiresConnection after this component has spawned.");
+                else
+                    _useConduitUpdater = value;
+            }
+        }
+
+
 
         protected abstract Endpoint EndpointType
         {
@@ -112,6 +137,10 @@ namespace MultiIO
         protected int portCell = -1;
         public GameObject CellVisualizer = null;
 
+        /// <summary>
+        /// Returns the IConduitFlow instance this port is managed by, based on its specified ConduitType.
+        /// </summary>
+        /// <returns>The IConduitFlow instance for this port.</returns>
         public IConduitFlow GetConduitManager()
         {
 
@@ -125,6 +154,10 @@ namespace MultiIO
             return null;
         }
 
+        /// <summary>
+        /// Get the integer cell position of this port.
+        /// </summary>
+        /// <returns>The integer cell position of this port.</returns>
         public int GetPortCell()
         {
             if (portCell == -1)
@@ -136,6 +169,10 @@ namespace MultiIO
             return portCell;
         }
 
+        /// <summary>
+        /// Get the ObjectLayer of the conduits for the associated ConduitType of this port.
+        /// </summary>
+        /// <returns>The associated ObjectLayer for conduits.</returns>
         public ObjectLayer GetConduitObjectLayer()
         {
             if (ConduitType == ConduitType.Gas)
@@ -148,11 +185,19 @@ namespace MultiIO
             return ObjectLayer.GasConduit;
         }
 
+        /// <summary>
+        /// Update the Conduit Exists status item if necessary, as well the guid item.
+        /// </summary>
+        /// <param name="force">Force the checks to occur, even if the connection status has not changed.</param>
         public abstract void UpdateConduitExistsStatus(bool force = false);
 
         protected abstract void ConduitTick(float delta);
 
-        protected IUtilityNetworkMgr GetNetworkManager()
+        /// <summary>
+        /// Get the IUtilityNetworkMgr associated with this ports Conduit Type.
+        /// </summary>
+        /// <returns>The associated IUtilityNetworkMgr.</returns>
+        public IUtilityNetworkMgr GetNetworkManager()
         {
             if (ConduitType == ConduitType.Solid)
                 return Game.Instance.solidConduitSystem;
@@ -181,7 +226,11 @@ namespace MultiIO
             _networkItem = new FlowUtilityNetwork.NetworkItem(ConduitType, EndpointType, portCell, _parent);
             networkManager.AddToNetworks(portCell, _networkItem, EndpointType != Endpoint.Conduit);
 
-            GetConduitManager().AddConduitUpdater(ConduitTick, FlowPriority);
+            if (UseConduitUpdater)
+            {
+                GetConduitManager().AddConduitUpdater(ConduitTick, FlowPriority);
+            }
+
             UpdateConduitExistsStatus(true);
         }
 

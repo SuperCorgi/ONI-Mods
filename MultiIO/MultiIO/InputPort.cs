@@ -61,6 +61,7 @@ namespace MultiIO
         [SerializeField]
         public bool KeepZeroMassObject = false;
 
+
         public SimHashes LastConsumedElement = SimHashes.Vacuum;
         private ConduitFlowPriority flowPriority = ConduitFlowPriority.First;
 
@@ -81,7 +82,6 @@ namespace MultiIO
         private bool PreviouslyConnected = false;
         private static readonly Operational.Flag inputConnectedFlag = new Operational.Flag("input_conduit", Operational.Flag.Type.Requirement);
         private Guid NeedsConduitStatusItemGuid;
-        private Action<InputPort> conduitUpdateCallback = null;
 
         /// <summary>
         /// Advanced use only. Update the Conduit Exists status item if necessary, as well the guid item.
@@ -116,28 +116,9 @@ namespace MultiIO
             PreviouslyConnected = connected;
 
         }
-        /// <summary>
-        /// Advanced use. Override the Input Port's default ConduitTick function with a custom function.
-        /// </summary>
-        public void ChangeConduitUpdater(Action<InputPort> callback)
-        {
-            conduitUpdateCallback = callback;
-        }
 
         protected override void ConduitTick(float delta)
         {
-            if(conduitUpdateCallback != null)
-            {
-                try
-                {
-                    conduitUpdateCallback(this);
-                }
-                catch(Exception ex)
-                {
-                    string msg = "[MultiIO] InputPort.ConduitTick(delta) -> A custom Conduit Updater was defined but an exception was thrown within it";
-                    throw new Exception(msg, ex);
-                }
-            }
             if (!AlwaysConsume && !operational.IsOperational)
                 return;
             IConduitFlow conduitFlow = GetConduitManager();
