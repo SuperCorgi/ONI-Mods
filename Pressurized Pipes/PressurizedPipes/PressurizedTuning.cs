@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using PressurizedPipes.BuildingConfigs;
 namespace PressurizedPipes
 {
     public class PressurizedInfo

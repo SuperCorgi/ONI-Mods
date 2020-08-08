@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Harmony;
 using UnityEngine;
+using PressurizedPipes.Components;
 namespace PressurizedPipes
 {
     public static class Integration
@@ -14,7 +15,7 @@ namespace PressurizedPipes
         private static readonly MethodBase overpressurePatch = AccessTools.Method(typeof(Integration), nameof(IntegrateOverpressure));
         private static readonly MethodBase conduitContentsAddMass = AccessTools.Method(typeof(ConduitFlow.ConduitContents), "AddMass");
 
-        //Replace references of ConduitFlow.MaxMass with a custom handler to determine if the MaxMass should higher for pressurized pipes
+        //Replace references of ConduitFlow.MaxMass with a custom handler to determine if the MaxMass should be higher for pressurized pipes
         internal static IEnumerable<CodeInstruction> AddIntegrationIfNeeded(CodeInstruction original, CodeInstruction toGetCell, bool isUpdateConduit = false)
         {
             //If the load field operand is being used to retrieve the maxMass field, override the maxMass value with our own max mass if necessary.

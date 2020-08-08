@@ -79,8 +79,7 @@ namespace PressurizedPipes.HarmonyPatches
                     yield return code;
                 }
             }
-            private static HashSet<int> cells = new HashSet<int>();
-            private static HashSet<int> cells2 = new HashSet<int>();
+
             //Change the overlay tint for the pipe if it is a pressurized pipe.
             private static Color32 PatchThermalColor(Color32 original, SaveLoadRoot layerTarget)
             {

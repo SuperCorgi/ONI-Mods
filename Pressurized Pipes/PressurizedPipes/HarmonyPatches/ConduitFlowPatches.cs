@@ -92,12 +92,6 @@ namespace PressurizedPipes.HarmonyPatches
                     return float.PositiveInfinity;
                 }
             }
-
-
-
-
-
-
         }
     }
 }
