@@ -125,7 +125,6 @@ namespace PipedRustDeoxidizer
         {
             go.AddOrGet<LogicOperationalController>();
             go.AddOrGetDef<PoweredActiveController.Def>();
-            go.AddOrGet<BuildingNotificationButton>();
         }
     }
 }

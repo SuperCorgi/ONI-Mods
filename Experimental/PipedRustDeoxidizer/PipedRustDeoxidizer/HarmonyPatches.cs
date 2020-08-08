@@ -20,6 +20,7 @@ namespace PipedRustDeoxidizer
                 ModUtil.AddBuildingToPlanScreen("Oxygen", PipedRustDeoxidizerConfig.ID);
             }
         }
+
         //Defines what research this should appear in
         [HarmonyPatch(typeof(Db))]
         [HarmonyPatch("Initialize")]
@@ -33,5 +34,5 @@ namespace PipedRustDeoxidizer
                 }.ToArray();
             }
         }
-    } //End HarmonyPatches class
-} //End Namespace
+    }
+}
