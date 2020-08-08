@@ -9,4 +9,6 @@ bin
 Properties
 obj
 .vs
+packages
+packages.config
 /standard_postbuild.txt
