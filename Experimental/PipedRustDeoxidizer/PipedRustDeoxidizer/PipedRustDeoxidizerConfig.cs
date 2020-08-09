@@ -52,9 +52,24 @@ namespace PipedRustDeoxidizer
 
             return buildingDef;
         }
+        public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+        {
+            base.DoPostConfigurePreview(def, go);
+            MultiOutput multiOut = go.AddOrGet<MultiOutput>();
+            OutputPort oxyOut = multiOut.AddPreviewOutputPort(ConduitType.Gas, new CellOffset(1, 1), PortIconColors.Oxygen);
+            OutputPort chloriOut = multiOut.AddPreviewOutputPort(ConduitType.Gas, new CellOffset(0, 1), PortIconColors.ChlorineGas);
+        }
 
+        public override void DoPostConfigureUnderConstruction(GameObject go)
+        {
+            base.DoPostConfigureUnderConstruction(go);
+            MultiOutput multiOut = go.AddOrGet<MultiOutput>();
+            OutputPort oxyOut = multiOut.AddPreviewOutputPort(ConduitType.Gas, new CellOffset(1, 1), PortIconColors.Oxygen);
+            OutputPort chloriOut = multiOut.AddPreviewOutputPort(ConduitType.Gas, new CellOffset(0, 1), PortIconColors.ChlorineGas);
+        }
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
+            
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
             go.AddOrGet<PipedRustDeoxidizer>().maxMass = 1.8f;
 

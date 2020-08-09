@@ -12,3 +12,4 @@ obj
 packages
 packages.config
 /standard_postbuild.txt
+app.config

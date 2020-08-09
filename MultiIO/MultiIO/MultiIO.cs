@@ -37,10 +37,10 @@ namespace MultiIO
         protected int count = 0;
 
 
-        [MyCmpReq]
+        [MyCmpGet]
         protected Operational operational;
 
-        [MyCmpReq]
+        [MyCmpGet]
         protected Storage storage;
 
 
@@ -55,6 +55,13 @@ namespace MultiIO
             comp.transform.parent = this.transform;
             _dirtyPortList = true;
             return comp;
+        }
+
+        protected T AddIOPort(T port)
+        {
+            port.transform.parent = this.transform;
+            _dirtyPortList = true;
+            return port;
         }
 
 

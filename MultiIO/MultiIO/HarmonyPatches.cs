@@ -42,7 +42,8 @@ namespace MultiIO
         [HarmonyPatch(typeof(BuildingDef), "AreConduitPortsInValidPositions")]
         public static class PipedRustDeoxidizer_BuildingDef_AreConduitPortsInValidPositions
         {
-            public static void Postfix(ref bool __result, BuildingDef __instance, GameObject source_go, int cell, Orientation orientation)
+            private static MethodInfo areConduitPortsInValidPositionsMethod = AccessTools.Method(typeof(BuildingDef), "IsValidConduitConnection");
+            public static void Postfix(ref bool __result, BuildingDef __instance, GameObject source_go, int cell, Orientation orientation, ref string fail_reason)
             {
                 if (!__result || source_go == null)
                     return;
@@ -52,7 +53,17 @@ namespace MultiIO
 
                 foreach (ConduitIO port in portList)
                 {
-
+                    CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(port.CellOffset, orientation);
+                    int portCell = Grid.OffsetCell(cell, rotatedCellOffset);
+                    //fail_reason is ref, Invoke will modify this array if fail_reason is used
+                    object[] parameters = new object[] { source_go, port.ConduitType, portCell, fail_reason };
+                    //Debug.Log($"[MultiIO] Are Conduit Ports in Valid Positions?");
+                    __result = (bool)areConduitPortsInValidPositionsMethod.Invoke(__instance, parameters );
+                    fail_reason = (string)parameters[3];
+                    if (!__result)
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -166,10 +177,16 @@ namespace MultiIO
                 Building building = Grid.Objects[cell, 1]?.GetComponent<Building>();
                 if (building == null)
                     return;
-
-                ConduitIO port = MultiIOExtensions.GetPortAt(building.gameObject, cell);
+                MultiInput multiInput = building.GetComponent<MultiInput>();
+                MultiOutput multiOut = building.GetComponent<MultiOutput>();
+                ConduitIO port = null;
+                port = multiInput?.GetPortAt(cell);
                 if (port == null)
-                    return;
+                {
+                    port = multiOut?.GetPortAt(cell);
+                    if (port == null)
+                        return;
+                }
 
                 ConduitType type = port.ConduitType;
                 string nameCheck = "";
@@ -204,8 +221,20 @@ namespace MultiIO
         {
             public static void Postfix(BuildingCellVisualizer __instance, int cell)
             {
-                ConduitIO port = MultiIOExtensions.GetPortAt(__instance.gameObject, cell);
-
+                //ConduitIO port = MultiIOExtensions.GetPortAt(__instance.gameObject, cell);
+                GameObject obj = Grid.Objects[cell, 1];
+                if (obj == null)
+                    return;
+                MultiInput multiInput = obj.GetComponent<MultiInput>();
+                MultiOutput multiOut = obj.GetComponent<MultiOutput>();
+                ConduitIO port = null;
+                port = multiInput?.GetPortAt(cell);
+                if (port == null)
+                {
+                    port = multiOut?.GetPortAt(cell);
+                    if (port == null)
+                        return;
+                }
                 if (port != null)
                 {
                     GameObject visualizer = port.CellVisualizer;

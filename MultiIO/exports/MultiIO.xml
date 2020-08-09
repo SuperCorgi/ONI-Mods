@@ -171,6 +171,15 @@
             <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
             <returns></returns>
         </member>
+        <member name="M:MultiIO.MultiInput.AddPreviewInputPort(ConduitType,CellOffset,UnityEngine.Color)">
+            <summary>
+            For DoPostConfigurePreview and DoPostUnderConstruction, adds a port specification that can appear during building previews. Implements no port functionality and acts as a visual placeholder until the building has been created.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <param name="iconColor">The color the port icon will appear as.</param>
+            <returns>A reference to the PreviewInput port. Not typically needed.</returns>
+        </member>
         <member name="P:MultiIO.MultiIO`1.PortList">
             <summary>
             A list containing all ports associated to this instance. This instance is tied as the parent GameObject to the ports.
@@ -231,6 +240,15 @@
             <param name="conduitType">The type of conduit this port should attach to.</param>
             <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
             <returns></returns>
+        </member>
+        <member name="M:MultiIO.MultiOutput.AddPreviewOutputPort(ConduitType,CellOffset,UnityEngine.Color)">
+            <summary>
+            For DoPostConfigurePreview and DoPostUnderConstruction, adds a port specification that can appear during building previews. Implements no port functionality and acts as a visual placeholder until the building has been created.
+            </summary>
+            <param name="conduitType">The type of conduit this port should attach to.</param>
+            <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+            <param name="iconColor">The color the port icon will appear as.</param>
+            <returns>A reference to the PreviewOutput port. Not typically needed.</returns>
         </member>
         <member name="T:MultiIO.OutputPort">
             <summary>
