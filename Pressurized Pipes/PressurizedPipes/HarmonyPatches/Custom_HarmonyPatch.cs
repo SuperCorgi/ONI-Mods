@@ -162,6 +162,7 @@ namespace PressurizedPipes.HarmonyPatches
             HarmonyMethod prefix = new HarmonyMethod(AccessTools.Method(typeof(CustomPatcher), "BiggerCapacityPrefix"));
             HarmonyMethod postfix = new HarmonyMethod(AccessTools.Method(typeof(CustomPatcher), "BiggerCapacityPostfix"));
             postfix.after = new string[] { instance.Id };
+            postfix.prioritiy = Priority.Last;
             customInstance.Patch(biggerCapacityTarget, prefix, postfix, null);
         }
         private class BiggerCapacityState
