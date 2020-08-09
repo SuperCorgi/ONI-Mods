@@ -75,5 +75,24 @@ namespace MultiIO
             return port;
         }
 
+
+        /// <summary>
+        /// For DoPostConfigurePreview and DoPostUnderConstruction, adds a port specification that can appear during building previews. Implements no port functionality and acts as a visual placeholder until the building has been created.
+        /// </summary>
+        /// <param name="conduitType">The type of conduit this port should attach to.</param>
+        /// <param name="offset">The offset (left-right, down-up) of where this port is located. Offsets begin bottom-left.</param>
+        /// <param name="iconColor">The color the port icon will appear as.</param>
+        /// <returns>A reference to the PreviewOutput port. Not typically needed.</returns>
+        public PreviewOutput AddPreviewOutputPort(ConduitType conduitType, CellOffset offset, Color iconColor)
+        {
+            iconColor.a = 1f;
+            GameObject obj = new GameObject();
+            PreviewOutput port = obj.AddComponent<PreviewOutput>(); port.ConduitType = conduitType;
+            port.CellOffset = offset;
+            port.IconColor = iconColor;
+            base.AddIOPort(port);
+            count++;
+            return port;
+        }
     }
 }

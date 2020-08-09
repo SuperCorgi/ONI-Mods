@@ -12,4 +12,4 @@ obj
 packages
 packages.config
 /standard_postbuild.txt
-/Experimental/PipedRustDeoxidizer/PipedRustDeoxidizer/app.config
+app.config

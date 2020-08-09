@@ -109,7 +109,7 @@ namespace MultiIO
             set
             {
                 if (_spawned)
-                    Debug.LogError($"[MultiIO] ConduitIO.RequiresConnection.set() -> Attempted to change RequiresConnection after this component has spawned.");
+                    Debug.LogError($"[MultiIO] ConduitIO.RequiresConnection.set() -> Attempted to change UseConduitUpdater after this component has spawned.");
                 else
                     _useConduitUpdater = value;
             }
@@ -158,7 +158,7 @@ namespace MultiIO
         /// Get the integer cell position of this port.
         /// </summary>
         /// <returns>The integer cell position of this port.</returns>
-        public int GetPortCell()
+        public virtual int GetPortCell()
         {
             if (portCell == -1)
             {
