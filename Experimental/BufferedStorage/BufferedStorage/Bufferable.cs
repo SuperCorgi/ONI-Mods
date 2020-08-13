@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using KSerialization;
 using UnityEngine;
-using KSerialization;
+//20
 namespace BufferedStorage
 {
     [SerializationConfig(MemberSerialization.OptIn)]
     public class Bufferable : KMonoBehaviour, ISaveLoadable, ISingleSliderControl, ISliderControl
     {
         [Serialize]
-        private float minimumDelivery = 0.5f;
+        private float minimumDelivery = 0f;
         public string SliderTitleKey => "STRINGS.UI.SIDESCREENS.BUFFERABLE.TITLE";
-        public string SliderUnits => "KG";
+        public string SliderUnits => "%";
 
         public float MinimumDelivery
         {
@@ -22,8 +19,8 @@ namespace BufferedStorage
             }
             set
             {
-                minimumDelivery = value;
-                storage.storageFullMargin = minimumDelivery;
+                minimumDelivery = Mathf.Clamp(value, 0f, 100f);
+                storage.storageFullMargin = Mathf.Max((minimumDelivery / 100) * storage.capacityKg, 0.5f);
                 //Trigger OnStorageChange to update meter animation and fetch logic
                 locker.Trigger((int)GameHashes.OnStorageChange);
             }
@@ -34,30 +31,16 @@ namespace BufferedStorage
         [MyCmpGet]
         Storage storage;
 
-
+        private void UpdateStorageMargin()
+        {
+            storage.storageFullMargin = Mathf.Max(minimumDelivery / 100) * locker.UserMaxCapacity;
+        }
 
         protected override void OnSpawn()
         {
             base.OnSpawn();
             MinimumDelivery = minimumDelivery;
         }
-
-        //private void OnStorageChange(object data)
-        //{
-        //    if (!inBufferMode && storage.MassStored() + storage.storageFullMargin > storage.capacityKg)
-        //    {
-        //        inBufferMode = true;
-        //        UpdateThresholds();
-        //    }
-        //    else if (inBufferMode)
-        //    {
-        //        if(storage.RemainingCapacity() > BufferThreshold * locker.UserMaxCapacity)
-        //        {
-        //            inBufferMode = false;
-        //            UpdateThresholds();
-        //        }
-        //    }
-        //}
 
         public int SliderDecimalPlaces(int idex)
         {
@@ -71,7 +54,7 @@ namespace BufferedStorage
 
         public float GetSliderMax(int index)
         {
-            return 4000f;
+            return 100f;
         }
 
         public float GetSliderValue(int index)
@@ -81,9 +64,7 @@ namespace BufferedStorage
 
         public void SetSliderValue(float percent, int index)
         {
-            //Debug.Log($"[Bufferable] Slider percent: {percent}");
             MinimumDelivery = percent;
-            //Debug.Log($"[Bufferable] MarginFull: {storage.storageFullMargin}, UserCapacity: {locker.UserMaxCapacity}, AmountStored: {locker.AmountStored}");
         }
 
         public string GetSliderTooltipKey(int index)
@@ -93,7 +74,7 @@ namespace BufferedStorage
 
         public string GetSliderTooltip()
         {
-            return "Set the storage margin.";
+            return "Set the minimum delivery (based on max capacity)";
         }
 
 
