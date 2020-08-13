@@ -2,6 +2,7 @@
 using Harmony;
 using System.Collections.Generic;
 using STRINGS;
+
 namespace PipedRustDeoxidizer
 {
     public class HarmonyPatches
@@ -30,7 +31,7 @@ namespace PipedRustDeoxidizer
             {
                 Techs.TECH_GROUPING["ImprovedOxygen"] = new List<string>(Techs.TECH_GROUPING["ImprovedOxygen"])
                 {
-                    PipedRustDeoxidizerConfig.ID
+                    PipedRustDeoxidizerConfig.ID,
                 }.ToArray();
             }
         }
