@@ -50,6 +50,8 @@ namespace PipedRustDeoxidizer
         private ElementConverter converter;
         [MyCmpReq]
         private Operational operational;
+        [MyCmpGet]
+        private Building building;
         private MeterController meter;
 
         protected override void OnSpawn()
